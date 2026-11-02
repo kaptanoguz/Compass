@@ -2,7 +2,7 @@
   "name": "torrent-bul",
   "productName": "Torrent Bul",
   "version": "1.0.0",
-  "description": "Konu, tür ya da film adıyla torrent bulup tek tıkla indiren sade masaüstü uygulaması.",
+  "description": "Türkçe torrent arama. İndirmeyi qBittorrent yapar; varsayılan kaynak Internet Archive.",
   "type": "module",
   "main": "electron/main.js",
   "desktopName": "torrent-bul.desktop",

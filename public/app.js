@@ -77,22 +77,25 @@ function toast(message, kind = '') {
 
 /* ---------- Kategori ve türler ---------- */
 
-const GENRE_HUES = [262, 16, 210, 340, 190, 150, 28, 280, 120, 0, 45, 230, 95, 310, 200, 355];
-
 async function loadMeta() {
   const meta = await api('meta');
   state.genres = meta.genres;
-  $('category').innerHTML = Object.entries(meta.categories)
+  const ids = (meta.providers || []).map((p) => p.id).filter(Boolean);
+  state.hasIndexer = ids.some((id) => id !== 'archive');
+  const categories = Object.entries(meta.categories).filter(([k]) => state.hasIndexer || k !== 'adult');
+  if (!categories.some(([k]) => k === state.category)) state.category = 'all';
+  $('category').innerHTML = categories
     .map(([k, label]) => `<option value="${k}">${esc(label)}</option>`)
     .join('');
   $('category').value = state.category;
+  $('browse').hidden = !state.hasIndexer;
+  if ($('source-note')) {
+    $('source-note').hidden = state.hasIndexer;
+    if (!ids.length) $('source-note').textContent = 'Etkin arama kaynağı yok. Ayarlar’dan bir kaynak aç.';
+  }
   $('genres').innerHTML = Object.entries(meta.genres)
-    .map(([g, label], i) => `<button type="button" class="genre-card" data-genre="${g}" data-hue="${GENRE_HUES[i % GENRE_HUES.length]}">
-        <span>${esc(label)}</span>
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-      </button>`)
+    .map(([g, label]) => `<button type="button" class="genre-card" data-genre="${g}"><span>${esc(label)}</span></button>`)
     .join('');
-  for (const el of $('genres').querySelectorAll('[data-hue]')) el.style.setProperty('--hue', el.dataset.hue);
 }
 
 $('category').addEventListener('change', async () => {
@@ -1062,20 +1065,16 @@ function libraryCard(e) {
   const pct = item?.durationSec ? Math.min(100, Math.round((item.positionSec / item.durationSec) * 100)) : 0;
   const watched = Boolean(item?.watched);
   const missing = e.missing || !item;
-  const art = e.poster
-    ? `<img src="${esc(e.poster)}" alt="" loading="lazy" referrerpolicy="no-referrer" />`
-    : `<span class="type-tile movies">${ICONS.movies}</span>`;
   const label = missing ? 'Dosya bulunamadı' : pct > 0 && !watched ? 'Kaldığın yerden izle' : 'İzle';
-  return `<li class="lib-card${missing ? ' is-missing' : ''}" data-hash="${esc(e.infoHash)}">
-    <button class="lib-poster" type="button" data-lib-play ${missing ? 'disabled' : ''} aria-label="${esc(e.title)}: ${label}" title="${label}">
-      ${art}${watched ? '<span class="lib-watched">İzlendi</span>' : ''}
-    </button>
-    <p class="lib-title" title="${esc(e.title)}">${esc(e.title)}</p>
-    <p class="lib-sub">
-      <span>${missing ? '<span class="missing">dosya bulunamadı</span>' : esc(e.year || '')}</span>
-      ${item && !missing ? `<button class="lib-mark" type="button" data-lib-watched aria-pressed="${watched}" title="${watched ? 'İzlenmedi olarak işaretle' : 'İzlendi olarak işaretle'}">✓ İzlendi</button>` : ''}
-    </p>
-    ${pct > 0 && !watched ? `<div class="bar"><span data-width="${pct}"></span></div>` : ''}
+  const thumb = e.poster
+    ? `<img class="lib-thumb" src="${esc(e.poster)}" alt="" loading="lazy" referrerpolicy="no-referrer" />`
+    : '';
+  return `<li class="lib-row${missing ? ' is-missing' : ''}" data-hash="${esc(e.infoHash)}">
+    ${thumb}
+    <button class="lib-play" type="button" data-lib-play ${missing ? 'disabled' : ''} aria-label="${esc(e.title)}: ${label}" title="${label}">${esc(e.title)}</button>
+    <span class="lib-year">${missing ? '<span class="missing">dosya yok</span>' : esc(e.year || '')}</span>
+    ${pct > 0 && !watched && !missing ? `<span class="lib-pct">%${pct}</span>` : '<span class="lib-pct"></span>'}
+    ${item && !missing ? `<button class="lib-mark" type="button" data-lib-watched aria-pressed="${watched}" title="${watched ? 'İzlenmedi olarak işaretle' : 'İzlendi olarak işaretle'}">${watched ? 'İzlendi' : 'İzlemedim'}</button>` : '<span></span>'}
   </li>`;
 }
 
@@ -1089,7 +1088,7 @@ async function loadLibrary() {
   $('library-list').innerHTML = state.library.map(libraryCard).join('');
   applyInlineStyles($('library-list'));
   for (const img of $('library-list').querySelectorAll('img')) {
-    img.addEventListener('error', () => img.replaceWith(Object.assign(document.createElement('span'), { className: 'type-tile movies', innerHTML: ICONS.movies })), { once: true });
+    img.addEventListener('error', () => img.remove(), { once: true });
   }
 }
 
@@ -1159,6 +1158,7 @@ $('settings').addEventListener('close', async () => {
         maxActiveDownloads: Number($('set-max').value) || 1, downloadLimitKbps: Number($('set-down').value) || 0, uploadLimitKbps: Number($('set-up').value) || 0 }),
     });
     toast('Ayarlar kaydedildi');
+    loadMeta().catch(() => {});
   } catch (err) {
     toast(err.message, 'error');
   }
