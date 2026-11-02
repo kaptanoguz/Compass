@@ -41,25 +41,24 @@ The genre list and the +18 category stay hidden until a Torznab source is enable
 
 ## Install
 
+Installers for Linux and Windows are on the [releases page](https://github.com/kaptanoguz/torrent/releases). qBittorrent is not inside the installer. Linux: `sudo apt install qbittorrent-nox`. Windows: install qBittorrent from [qbittorrent.org](https://www.qbittorrent.org/download), then run the setup exe. The app looks for `qbittorrent.exe` in `Program Files`.
+
+From source:
+
 ```bash
 sudo apt install qbittorrent-nox   # Linux, no window
 npm install
-npm run kisayol                    # Linux: add Torrent Bul to the application menu
+npm run kisayol                    # Linux only, if you did not use the installer
 ```
 
-Open **Torrent Bul** from the application menu after that. You do not need `npm start` day to day. The dock icon is registered by `npm run kisayol`; without it the dock shows a blank or a gear. Run the command again if you move the project folder.
-
-`npm start` still works, and uses the same window class so the menu icon applies.
-
-On Windows and macOS, install qBittorrent from [qbittorrent.org](https://www.qbittorrent.org/download). If the binary is elsewhere, set `QBITTORRENT_BIN`. Packaged builds pick up the icon themselves; there is no `kisayol` step.
+Open **Torrent Bul** from the application menu. The packaged build already has a menu entry and a dock icon, so `npm run kisayol` is only for a source checkout. `npm start` still works.
 
 In a browser: `npm run web` opens `http://127.0.0.1:4517`.
 
-Build an installer (not published; output goes to `dist/`):
+Build installers locally (output in `dist/`, not signed):
 
 ```bash
 npm run dist:win
-npm run dist:mac
 npm run dist:linux
 ```
 
