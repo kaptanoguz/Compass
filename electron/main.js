@@ -5,17 +5,16 @@ import { startServer } from '../src/server.js';
 import { magnetFromArgv } from '../src/magnet.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-// Pencere sınıfı kısayoldaki StartupWMClass ile aynı olsun: dock "npm start" ile
-// açılınca da kurulu net simgeyi kullanır, pencerenin küçük simgesini büyütmez.
-if (process.platform === 'linux' && !app.commandLine.hasSwitch('class')) app.commandLine.appendSwitch('class', 'torrent-bul');
+// Linux dock simgesi .desktop dosyasındaki StartupWMClass ile eşleşir.
+// Sınıf "electron" kalırsa görev çubuğu boş ya da çark simgesi gösterir.
+if (process.platform === 'linux' && !app.commandLine.hasSwitch('class')) {
+  app.commandLine.appendSwitch('class', 'torrent-bul');
+}
 let server;
 let win = null;
 let tray = null;
 let quitting = false;
 const pendingMagnets = []; // sunucu hazır olmadan gelen bağlantılar
-
-// Linux masaüstü pencereyi torrent-bul.desktop kısayoluyla (npm run kisayol) bu adla eşleştirir.
-if (process.platform === 'linux') app.commandLine.appendSwitch('class', 'torrent-bul');
 
 // Tek örnek: ikinci açılış (ör. tarayıcıda magnet'e tıklamak) mevcut pencereye gelir.
 if (!app.requestSingleInstanceLock()) {
@@ -79,7 +78,7 @@ async function createWindow() {
     title: 'Torrent Bul',
     // Simge verilmezse Linux'ta pencere ve görev çubuğunda genel çark simgesi çıkar.
     icon: path.join(here, 'icon.png'),
-    backgroundColor: nativeTheme.shouldUseDarkColors ? '#0d0f14' : '#f6f7fb',
+    backgroundColor: nativeTheme.shouldUseDarkColors ? '#141414' : '#f3f3f1',
     titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'default',
     autoHideMenuBar: true,
     webPreferences: { contextIsolation: true, sandbox: true },

@@ -17,7 +17,7 @@
     "node": ">=20"
   },
   "scripts": {
-    "start": "electron .",
+    "start": "electron . --class=torrent-bul",
     "web": "node bin/web.js",
     "kisayol": "node bin/kisayol.js",
     "test": "node --test --test-force-exit",

@@ -44,12 +44,14 @@ The genre list and the +18 category stay hidden until a Torznab source is enable
 ```bash
 sudo apt install qbittorrent-nox   # Linux, no window
 npm install
-npm start
+npm run kisayol                    # Linux: add Torrent Bul to the application menu
 ```
 
-Once, on Linux, to add a menu entry: `npm run kisayol`
+Open **Torrent Bul** from the application menu after that. You do not need `npm start` day to day. The dock icon is registered by `npm run kisayol`; without it the dock shows a blank or a gear. Run the command again if you move the project folder.
 
-On Windows and macOS, install qBittorrent from [qbittorrent.org](https://www.qbittorrent.org/download). If the binary is elsewhere, set `QBITTORRENT_BIN`.
+`npm start` still works, and uses the same window class so the menu icon applies.
+
+On Windows and macOS, install qBittorrent from [qbittorrent.org](https://www.qbittorrent.org/download). If the binary is elsewhere, set `QBITTORRENT_BIN`. Packaged builds pick up the icon themselves; there is no `kisayol` step.
 
 In a browser: `npm run web` opens `http://127.0.0.1:4517`.
 

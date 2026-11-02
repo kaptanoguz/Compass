@@ -36,14 +36,21 @@ for (const f of fs.readdirSync(path.join(root, 'build', 'icons'))) {
 }
 
 const q = (s) => `"${s.replace(/(["`$\\])/g, '\\$1')}"`;
+const iconPng = path.join(root, 'build', 'icon.png');
+// Icon=tema adı bazı masaüstlerinde önbelleğe takılıp boş görünür.
+// Mutlak png yolu dock'ta hemen çizilir.
 const desktop = `[Desktop Entry]
 Type=Application
+Version=1.0
 Name=Torrent Bul
-Comment=Film, dizi ve kitap bul, tek tıkla indir
+GenericName=Torrent arama
+Comment=Film, dizi ve kitap ara, indir, izle
 Exec=${q(electron)} ${q(root)} --class=torrent-bul %U
-Icon=torrent-bul
+Icon=${iconPng}
 Terminal=false
-Categories=Network;FileTransfer;P2P;
+Categories=AudioVideo;Network;FileTransfer;
+Keywords=torrent;film;dizi;video;
+StartupNotify=true
 StartupWMClass=torrent-bul
 `;
 const file = path.join(appDir, 'torrent-bul.desktop');
