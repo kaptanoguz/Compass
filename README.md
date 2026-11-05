@@ -51,7 +51,7 @@ npm install
 npm run kisayol                    # Linux only, if you did not use the installer
 ```
 
-Open **Compass** from the application menu. The packaged build already has a menu entry and a dock icon, so `npm run kisayol` is only for a source checkout. `npm start` still works.
+Open **Compass** from the application menu. The packaged build already has a menu entry and a dock icon, so `npm run kisayol` is only for a source checkout. On Linux, `npm start` also adds or refreshes the menu entry and the compass icon on each launch, so the dock shows the icon while the app runs.
 
 In a browser: `npm run web` opens `http://127.0.0.1:4517`.
 
