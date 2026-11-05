@@ -1,7 +1,7 @@
 {
   "name": "compass",
   "productName": "Compass",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Türkçe torrent arama. İndirmeyi qBittorrent yapar; varsayılan kaynak Internet Archive.",
   "type": "module",
   "main": "electron/main.js",
