@@ -379,7 +379,7 @@ export function createQbEngine({ profileDir, start = () => launchQbittorrent({ p
     for (const t of tracked) {
       if (t.destroyed) continue;
       const info = infos.get(t.infoHash);
-      if (process.env.QB_DEBUG && t.lastDebug !== `${info?.state}|${info?.progress}`) { t.lastDebug = `${info?.state}|${info?.progress}`; console.error('[qb-debug]', t.infoHash?.slice(0, 8), t.lastDebug, info?.save_path, info?.content_path, info?.dlspeed); }
+      if (process.env.QB_DEBUG && t.lastDebug !== `${info?.state}|${info?.progress}`) { t.lastDebug = `${info?.state}|${info?.progress}`; console.error('[qb-debug]', t.infoHash?.slice(0, 8), t.lastDebug, info?.save_path, info?.content_path, info?.dlspeed); if (info) api.get('torrents/webseeds', { hash: t.infoHash }).then((w) => console.error('[qb-debug] webseeds', JSON.stringify(w))).catch((e) => console.error('[qb-debug] webseeds err', e.message)); }
       if (!info) { fail(t, new Error('Torrent qBittorrent listesinden kaldırıldı.')); continue; }
       if (info.state === 'error') { fail(t, new Error('qBittorrent bu torrentte hata bildirdi (klasöre yazılamıyor ya da disk dolu olabilir).')); continue; }
       if (info.state === 'missingFiles') { fail(t, new Error('İndirilen dosyalar bulunamadı; taşınmış ya da silinmiş olabilir.')); continue; }

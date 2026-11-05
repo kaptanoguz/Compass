@@ -49,6 +49,7 @@ test('biten indirme kapanır, video ve altyazı sunulur, taşınan dosya tekrar 
 
   let torrentBuf;
   const server = http.createServer((req, res) => {
+    if (process.env.QB_DEBUG) console.error('[qb-debug] http', req.method, req.url, req.headers.range || '', req.headers['user-agent'] || '');
     if (req.url === '/item.torrent') { res.writeHead(200); return res.end(torrentBuf); }
     const name = decodeURIComponent(req.url).replace(/^\/Film\//, '');
     const body = files[name];
