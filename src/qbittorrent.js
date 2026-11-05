@@ -421,7 +421,11 @@ export function createQbEngine({ profileDir, start = () => launchQbittorrent({ p
     t.pieces = new Array(Math.ceil(info.total_size / props.piece_size));
     t.length = info.total_size;
     t.name = info.name;
-    try { t.torrentFile = await api.get('torrents/export', { hash: t.infoHash }, { raw: true }); } catch { /* eski qBittorrent */ }
+    // Elde .torrent varsa o saklanır: qBittorrent 5'in dışa aktardığı dosyada web seed (url-list) yok,
+    // onunla yeniden eklenen Internet Archive torrenti hiç inmez. Dışa aktarma yalnızca magnet içindir.
+    if (!t.torrentFile) {
+      try { t.torrentFile = await api.get('torrents/export', { hash: t.infoHash }, { raw: true }); } catch { /* eski qBittorrent */ }
+    }
     // Bekletilen torrent eski seçimini taşıyabilir; varsayılan her eklemede açıkça kurulur.
     const want = t.deselect ? 0 : 1;
     await setPriority(api, t, t.files.filter((f) => f.priority !== want).map((f) => f.index), want);

@@ -20,12 +20,14 @@ async function call(app, p, opts = {}) {
 }
 
 async function waitFor(app, check) {
+  let list;
   for (let i = 0; i < 100; i++) {
-    const list = (await call(app, 'downloads')).body;
+    list = (await call(app, 'downloads')).body;
     if (check(list)) return list;
     await wait(100);
   }
-  throw new Error('zaman aşımı');
+  // Son durum hatada görünsün: CI'da neden beklendiği ancak böyle anlaşılır.
+  throw new Error(`zaman aşımı; son durum: ${JSON.stringify(list.map(({ status, error, missing, progress, files }) => ({ status, error, missing, progress, files: files?.length })))}`);
 }
 
 // "Ğüşİöç" Windows-1254 kodlamasıyla, Türkçe altyazılarda sık görülen hâli.
