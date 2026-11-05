@@ -12,7 +12,7 @@ import { createTorznabProvider } from '../src/providers/torznab.js';
 import { startServer } from '../src/server.js';
 import { createQbEngine } from '../src/qbittorrent.js';
 
-const tmp = () => fs.mkdtempSync(path.join(os.tmpdir(), 'torrent-bul-state-'));
+const tmp = () => fs.mkdtempSync(path.join(os.tmpdir(), 'compass-state-'));
 
 function base32(hex) {
   const bits = [...hex].map((c) => parseInt(c, 16).toString(2).padStart(4, '0')).join('');

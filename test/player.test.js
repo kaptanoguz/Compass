@@ -8,7 +8,7 @@ import createTorrent from 'create-torrent';
 import { startServer } from '../src/server.js';
 import { startSeeder } from './helpers/seeder.js';
 
-const tmp = () => fs.mkdtempSync(path.join(os.tmpdir(), 'torrent-bul-player-'));
+const tmp = () => fs.mkdtempSync(path.join(os.tmpdir(), 'compass-player-'));
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function call(app, p, opts = {}) {

@@ -12,7 +12,7 @@ import { EventEmitter } from 'node:events';
 import { Readable } from 'node:stream';
 import parseTorrent from 'parse-torrent';
 
-const CATEGORY = 'torrent-bul';
+const CATEGORY = 'torrent-bul'; // eski adla kalır: önceki indirmeler aynı kategoride bulunur
 const NO_ETA = 8640000; // qBittorrent "sonsuz" süre değeri
 const BUSY = new Set(['metaDL', 'checkingDL', 'checkingUP', 'checkingResumeData', 'allocating', 'moving']);
 const SUBTITLE = /\.(srt|vtt|ass|ssa|sub)$/i;
@@ -63,7 +63,7 @@ function writeConfig(profileDir, { port, password, gui }) {
   const lines = [
     '[LegalNotice]', 'Accepted=true', '',
     '[BitTorrent]',
-    'Session\\QueueingSystemEnabled=false', // sırayı Torrent Bul yönetir
+    'Session\\QueueingSystemEnabled=false', // sırayı Compass yönetir
     'Session\\TorrentContentLayout=Original',
     'Session\\TempPathEnabled=false',
     'Session\\AddExtensionToIncompleteFiles=false',
@@ -299,7 +299,7 @@ export function createQbEngine({ profileDir, start = () => launchQbittorrent({ p
     session ??= (async () => {
       const s = await start();
       await s.api.post('torrents/createCategory', { category: CATEGORY, savePath: '' }).catch(() => {});
-      // Önceki oturumdan kalanlar durdurulur; hangisinin süreceğine Torrent Bul karar verir.
+      // Önceki oturumdan kalanlar durdurulur; hangisinin süreceğine Compass karar verir.
       await control(s.api, 'pause', await categoryHashes(s.api)).catch(() => {});
       await applyLimits(s.api);
       return s;

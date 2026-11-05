@@ -1,4 +1,5 @@
 import { app, BrowserWindow, Menu, Tray, nativeImage, shell, nativeTheme } from 'electron';
+import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { startServer } from '../src/server.js';
@@ -8,8 +9,11 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 // Linux dock simgesi .desktop dosyasındaki StartupWMClass ile eşleşir.
 // Sınıf "electron" kalırsa görev çubuğu boş ya da çark simgesi gösterir.
 if (process.platform === 'linux' && !app.commandLine.hasSwitch('class')) {
-  app.commandLine.appendSwitch('class', 'torrent-bul');
+  app.commandLine.appendSwitch('class', 'compass');
 }
+// Eski adla ("Torrent Bul") kaydedilmiş ayarlar, indirmeler ve kütüphane yerinde kalsın.
+const legacyData = path.join(app.getPath('appData'), 'Torrent Bul');
+if (fs.existsSync(legacyData)) app.setPath('userData', legacyData);
 let server;
 let win = null;
 let tray = null;
@@ -57,7 +61,7 @@ function showWindow() {
 function ensureTray() {
   if (tray) return;
   tray = new Tray(nativeImage.createFromPath(path.join(here, 'tray.png')));
-  tray.setToolTip('Torrent Bul');
+  tray.setToolTip('Compass');
   tray.setContextMenu(Menu.buildFromTemplate([
     { label: 'Aç', click: showWindow },
     { label: 'Çıkış', click: () => { quitting = true; app.quit(); } },
@@ -75,7 +79,7 @@ async function createWindow() {
     height: 800,
     minWidth: 760,
     minHeight: 560,
-    title: 'Torrent Bul',
+    title: 'Compass',
     // Simge verilmezse Linux'ta pencere ve görev çubuğunda genel çark simgesi çıkar.
     icon: path.join(here, 'icon.png'),
     backgroundColor: nativeTheme.shouldUseDarkColors ? '#141414' : '#f3f3f1',

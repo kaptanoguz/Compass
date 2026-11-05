@@ -5,7 +5,7 @@ import { startServer } from '../src/server.js';
 
 const port = Number(process.env.PORT) || 4517;
 const app = await startServer({ port });
-console.log(`Torrent Bul hazır: ${app.url}`);
+console.log(`Compass hazır: ${app.url}`);
 if (!process.argv.includes('--no-open')) {
   const cmd = process.platform === 'darwin' ? 'open' : process.platform === 'win32' ? 'cmd' : 'xdg-open';
   const args = process.platform === 'win32' ? ['/c', 'start', '', app.url] : [app.url];

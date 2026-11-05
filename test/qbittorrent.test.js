@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { createQbEngine, launchQbittorrent, findQbittorrent } from '../src/qbittorrent.js';
 
-const tmp = () => fs.mkdtempSync(path.join(os.tmpdir(), 'torrent-bul-qb-'));
+const tmp = () => fs.mkdtempSync(path.join(os.tmpdir(), 'compass-qb-'));
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 const hash = 'c12fe1c06bba254a9dc9f519b335aa7c1367a88a';
 

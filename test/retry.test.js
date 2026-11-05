@@ -6,7 +6,7 @@ import path from 'node:path';
 import { EventEmitter } from 'node:events';
 import { createDownloadManager, isTransientError, MAX_RETRIES, BLOCKED_MESSAGE } from '../src/downloads.js';
 
-const tmp = () => fs.mkdtempSync(path.join(os.tmpdir(), 'torrent-bul-retry-'));
+const tmp = () => fs.mkdtempSync(path.join(os.tmpdir(), 'compass-retry-'));
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 const magnet = (c) => `magnet:?xt=urn:btih:${c.repeat(40)}`;
 

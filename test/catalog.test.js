@@ -9,7 +9,7 @@ import { startServer } from '../src/server.js';
 import { createLibrary } from '../src/library.js';
 import { addImdbRatings, createRatingsCache } from '../src/ratings.js';
 
-const tmp = () => fs.mkdtempSync(path.join(os.tmpdir(), 'torrent-bul-lib2-'));
+const tmp = () => fs.mkdtempSync(path.join(os.tmpdir(), 'compass-lib2-'));
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function call(app, p, opts = {}) {

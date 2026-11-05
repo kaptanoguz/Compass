@@ -7,7 +7,7 @@ import http from 'node:http';
 import createTorrent from 'create-torrent';
 import { startServer } from '../src/server.js';
 
-const tmp = () => fs.mkdtempSync(path.join(os.tmpdir(), 'torrent-bul-'));
+const tmp = () => fs.mkdtempSync(path.join(os.tmpdir(), 'compass-'));
 
 async function call(app, p, opts = {}) {
   const res = await fetch(new URL(`api/${p}`, app.url), {

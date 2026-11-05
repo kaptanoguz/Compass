@@ -7,7 +7,7 @@ import http from 'node:http';
 import createTorrent from 'create-torrent';
 import { startServer } from '../src/server.js';
 
-const tmp = () => fs.mkdtempSync(path.join(os.tmpdir(), 'torrent-bul-pick-'));
+const tmp = () => fs.mkdtempSync(path.join(os.tmpdir(), 'compass-pick-'));
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function call(app, p, opts = {}) {

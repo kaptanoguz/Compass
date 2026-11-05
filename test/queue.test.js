@@ -9,7 +9,7 @@ import { startServer } from '../src/server.js';
 import { createQbEngine } from '../src/qbittorrent.js';
 import { createSettingsStore } from '../src/settings.js';
 
-const tmp = () => fs.mkdtempSync(path.join(os.tmpdir(), 'torrent-bul-queue-'));
+const tmp = () => fs.mkdtempSync(path.join(os.tmpdir(), 'compass-queue-'));
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function call(app, p, opts = {}) {

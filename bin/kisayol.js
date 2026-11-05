@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Linux'ta uygulama menüsüne "Torrent Bul" kısayolu ve simgesi ekler.
+// Linux'ta uygulama menüsüne "Compass" kısayolu ve simgesi ekler.
 // GNOME/KDE pencereyi bu .desktop dosyasıyla eşleştirir; dosya yoksa görev
 // çubuğunda genel çark simgesi görünür. Yalnızca kullanıcının kendi klasörüne yazar.
 import fs from 'node:fs';
@@ -28,7 +28,7 @@ fs.mkdirSync(appDir, { recursive: true });
 const install = (from, size, ext) => {
   const dir = path.join(data, 'icons', 'hicolor', size, 'apps');
   fs.mkdirSync(dir, { recursive: true });
-  fs.copyFileSync(from, path.join(dir, `torrent-bul.${ext}`));
+  fs.copyFileSync(from, path.join(dir, `compass.${ext}`));
 };
 install(path.join(root, 'public', 'icon.svg'), 'scalable', 'svg');
 for (const f of fs.readdirSync(path.join(root, 'build', 'icons'))) {
@@ -42,18 +42,23 @@ const iconPng = path.join(root, 'build', 'icon.png');
 const desktop = `[Desktop Entry]
 Type=Application
 Version=1.0
-Name=Torrent Bul
+Name=Compass
 GenericName=Torrent arama
 Comment=Film, dizi ve kitap ara, indir, izle
-Exec=${q(electron)} ${q(root)} --class=torrent-bul %U
+Exec=${q(electron)} ${q(root)} --class=compass %U
 Icon=${iconPng}
 Terminal=false
 Categories=AudioVideo;Network;FileTransfer;
 Keywords=torrent;film;dizi;video;
 StartupNotify=true
-StartupWMClass=torrent-bul
+StartupWMClass=compass
 `;
-const file = path.join(appDir, 'torrent-bul.desktop');
+const file = path.join(appDir, 'compass.desktop');
+// Uygulamanın eski adıyla ("Torrent Bul") kurulmuş kısayol ve simgeler kaldırılır; menüde iki kayıt kalmasın.
+fs.rmSync(path.join(appDir, 'torrent-bul.desktop'), { force: true });
+for (const size of fs.readdirSync(path.join(data, 'icons', 'hicolor'))) {
+  for (const ext of ['png', 'svg']) fs.rmSync(path.join(data, 'icons', 'hicolor', size, 'apps', `torrent-bul.${ext}`), { force: true });
+}
 fs.writeFileSync(file, desktop);
 fs.chmodSync(file, 0o755);
 // Menünün hemen yenilenmesi için; araç yoksa sorun değil.
@@ -61,4 +66,4 @@ spawnSync('update-desktop-database', [appDir], { stdio: 'ignore' });
 spawnSync('gtk-update-icon-cache', ['-f', '-t', path.join(data, 'icons', 'hicolor')], { stdio: 'ignore' });
 
 console.log(`Kısayol eklendi: ${file}`);
-console.log('Uygulama menüsünde "Torrent Bul" diye aratabilirsin. Klasörü taşırsan bu komutu yeniden çalıştır.');
+console.log('Uygulama menüsünde "Compass" diye aratabilirsin. Klasörü taşırsan bu komutu yeniden çalıştır.');

@@ -10,7 +10,7 @@ import { screenPrograms, BLOCKED_MESSAGE } from '../src/downloads.js';
 import { mapDoc } from '../src/providers/archive.js';
 import { createLibrary } from '../src/library.js';
 
-const tmp = () => fs.mkdtempSync(path.join(os.tmpdir(), 'torrent-bul-safe-'));
+const tmp = () => fs.mkdtempSync(path.join(os.tmpdir(), 'compass-safe-'));
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function call(app, p, opts = {}) {
