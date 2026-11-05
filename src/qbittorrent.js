@@ -290,6 +290,7 @@ export function createQbEngine({ profileDir, start = () => launchQbittorrent({ p
   let session = null; // Promise<{ api, stop }>
   let limits = { download: 0, upload: 0 };
   const live = new Set();
+  const releasing = new Set(); // kapanışta beklenecek silme/duraklatma istekleri
   let timer = null;
   let failures = 0;
   let closing = false;
@@ -344,7 +345,10 @@ export function createQbEngine({ profileDir, start = () => launchQbittorrent({ p
     t.forget = forget;
     live.delete(t);
     if (!t.infoHash || !t.added || !session) return; // ekleme sürüyorsa add() kendisi halleder
-    session.then((s) => (forget ? s.api.post('torrents/delete', { hashes: t.infoHash, deleteFiles: 'false' }) : control(s.api, 'pause', t.infoHash))).catch(() => {});
+    const done = session.then((s) => (forget ? s.api.post('torrents/delete', { hashes: t.infoHash, deleteFiles: 'false' }) : control(s.api, 'pause', t.infoHash))).catch(() => {});
+    // Kapanış bu isteği bekler; yoksa qBittorrent silmeyi kaydetmeden kapanabilir.
+    releasing.add(done);
+    done.finally(() => releasing.delete(done));
   }
 
   function schedule() {
@@ -465,7 +469,15 @@ export function createQbEngine({ profileDir, start = () => launchQbittorrent({ p
         if (buf) t.torrentFile = buf;
         if (t.destroyed) return;
         // Duraklatılıp bekletilen torrent yeniden eklenmez: dosyalar baştan kontrol edilmeden sürer.
-        if ((await api.get('torrents/info', { hashes: t.infoHash })).length) {
+        // Dosyaları taşınmış/silinmiş eski kayıt ("Tekrar indir") ise qBittorrent'ten silinip temiz eklenir;
+        // yoksa qBittorrent 5 onu "dosyalar bulunamadı" hatasıyla bırakır.
+        let [existing] = await api.get('torrents/info', { hashes: t.infoHash });
+        if (existing && existing.progress > 0 && existing.content_path && !fs.existsSync(existing.content_path)) {
+          await api.post('torrents/delete', { hashes: t.infoHash, deleteFiles: 'false' });
+          for (let i = 0; i < 40 && (await api.get('torrents/info', { hashes: t.infoHash })).length; i++) await sleep(50);
+          existing = null;
+        }
+        if (existing) {
           await control(api, 'pause', t.infoHash); // seçim yeniden yapılana kadar inmesin
           t.added = true;
           if (t.destroyed) release2(api, t);
@@ -541,6 +553,7 @@ export function createQbEngine({ profileDir, start = () => launchQbittorrent({ p
     async destroy() {
       closing = true;
       clearTimeout(timer);
+      await Promise.all(releasing);
       for (const t of live) t.destroyed = true;
       live.clear();
       if (!session) return;
