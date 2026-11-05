@@ -1,14 +1,28 @@
 import { app, BrowserWindow, Menu, Tray, nativeImage, shell, nativeTheme } from 'electron';
+import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { startServer } from '../src/server.js';
 import { magnetFromArgv } from '../src/magnet.js';
+import { installDesktopEntry } from '../src/desktop-entry.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 // Linux dock simgesi .desktop dosyasındaki StartupWMClass ile eşleşir.
 // Sınıf "electron" kalırsa görev çubuğu boş ya da çark simgesi gösterir.
 if (process.platform === 'linux' && !app.commandLine.hasSwitch('class')) {
-  app.commandLine.appendSwitch('class', 'torrent-bul');
+  app.commandLine.appendSwitch('class', 'compass');
+}
+// Eski adla ("Torrent Bul") kaydedilmiş ayarlar, indirmeler ve kütüphane yerinde kalsın.
+const legacyData = path.join(app.getPath('appData'), 'Torrent Bul');
+if (fs.existsSync(legacyData)) app.setPath('userData', legacyData);
+// Geliştirme sürümünde (npm start) menü kısayolu ve simge açılışta kurulur/güncellenir;
+// dock pencereyi kısayolla eşleştirip pusula simgesini gösterir. Kurulum paketleri bunu kendisi yapar.
+if (process.platform === 'linux' && !app.isPackaged) {
+  try {
+    installDesktopEntry({ root: app.getAppPath(), electron: process.execPath });
+  } catch (err) {
+    console.warn('[simge] kısayol kurulamadı:', err.message);
+  }
 }
 let server;
 let win = null;
@@ -57,7 +71,7 @@ function showWindow() {
 function ensureTray() {
   if (tray) return;
   tray = new Tray(nativeImage.createFromPath(path.join(here, 'tray.png')));
-  tray.setToolTip('Torrent Bul');
+  tray.setToolTip('Compass');
   tray.setContextMenu(Menu.buildFromTemplate([
     { label: 'Aç', click: showWindow },
     { label: 'Çıkış', click: () => { quitting = true; app.quit(); } },
@@ -75,7 +89,7 @@ async function createWindow() {
     height: 800,
     minWidth: 760,
     minHeight: 560,
-    title: 'Torrent Bul',
+    title: 'Compass',
     // Simge verilmezse Linux'ta pencere ve görev çubuğunda genel çark simgesi çıkar.
     icon: path.join(here, 'icon.png'),
     backgroundColor: nativeTheme.shouldUseDarkColors ? '#141414' : '#f3f3f1',

@@ -26,9 +26,13 @@ const MIME = {
 
 export function defaultDataDir() {
   const home = os.homedir();
-  if (process.platform === 'win32') return path.join(process.env.APPDATA || home, 'Torrent Bul');
-  if (process.platform === 'darwin') return path.join(home, 'Library', 'Application Support', 'Torrent Bul');
-  return path.join(process.env.XDG_CONFIG_HOME || path.join(home, '.config'), 'torrent-bul');
+  const base = process.platform === 'win32' ? process.env.APPDATA || home
+    : process.platform === 'darwin' ? path.join(home, 'Library', 'Application Support')
+      : process.env.XDG_CONFIG_HOME || path.join(home, '.config');
+  // Eski adla ("Torrent Bul") kaydedilmiş veriler varsa onlar kullanılır.
+  const legacy = path.join(base, process.platform === 'linux' ? 'torrent-bul' : 'Torrent Bul');
+  if (fs.existsSync(legacy)) return legacy;
+  return path.join(base, process.platform === 'linux' ? 'compass' : 'Compass');
 }
 
 function systemOpen(target) {

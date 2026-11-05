@@ -8,7 +8,7 @@ import createTorrent from 'create-torrent';
 import { startServer } from '../src/server.js';
 import { subtitleToVtt } from '../src/downloads.js';
 
-const tmp = () => fs.mkdtempSync(path.join(os.tmpdir(), 'torrent-bul-lib-'));
+const tmp = () => fs.mkdtempSync(path.join(os.tmpdir(), 'compass-lib-'));
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function call(app, p, opts = {}) {

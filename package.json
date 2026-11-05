@@ -1,11 +1,11 @@
 {
-  "name": "torrent-bul",
-  "productName": "Torrent Bul",
+  "name": "compass",
+  "productName": "Compass",
   "version": "1.0.0",
   "description": "Türkçe torrent arama. İndirmeyi qBittorrent yapar; varsayılan kaynak Internet Archive.",
   "type": "module",
   "main": "electron/main.js",
-  "desktopName": "torrent-bul.desktop",
+  "desktopName": "compass.desktop",
   "license": "MIT",
   "author": "kaptanoguz",
   "repository": {
@@ -17,7 +17,7 @@
     "node": ">=20"
   },
   "scripts": {
-    "start": "electron . --class=torrent-bul",
+    "start": "electron . --class=compass",
     "web": "node bin/web.js",
     "kisayol": "node bin/kisayol.js",
     "test": "node --test --test-force-exit",
@@ -35,8 +35,8 @@
     "electron-builder": "^26.15.3"
   },
   "build": {
-    "appId": "com.kaptanoguz.torrentbul",
-    "productName": "Torrent Bul",
+    "appId": "com.kaptanoguz.compass",
+    "productName": "Compass",
     "files": [
       "electron/**",
       "src/**",
@@ -68,7 +68,7 @@
       "target": ["AppImage", "deb"],
       "category": "Network",
       "synopsis": "Search, download, and play. qBittorrent does the transfer.",
-      "executableName": "torrent-bul",
+      "executableName": "compass",
       "syncDesktopName": true
     }
   }

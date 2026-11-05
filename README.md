@@ -1,4 +1,4 @@
-# Torrent Bul
+# Compass
 
 Search for a movie, series, album, or book, download it, and play it while it finishes. Downloads run in [qBittorrent](https://www.qbittorrent.org). The app starts qBittorrent with its own profile and does not touch your settings or torrent list. The interface is Turkish.
 
@@ -31,7 +31,7 @@ tar -xzf Jackett.Binaries.LinuxAMDx64.tar.gz && cd Jackett && sudo ./install_ser
 
 1. Open `http://127.0.0.1:9117` and add sites with **+ Add indexer**.
 2. Copy the API key at the top right.
-3. In Torrent Bul open **Ayarlar**, choose **+ Kendi indeksleyicini ekle**, paste the key, and save.
+3. In Compass open **Ayarlar**, choose **+ Kendi indeksleyicini ekle**, paste the key, and save.
 
 Private trackers you belong to are in Jackett's list too. Some Cloudflare-protected sites also need [FlareSolverr](https://github.com/FlareSolverr/FlareSolverr).
 
@@ -51,7 +51,7 @@ npm install
 npm run kisayol                    # Linux only, if you did not use the installer
 ```
 
-Open **Torrent Bul** from the application menu. The packaged build already has a menu entry and a dock icon, so `npm run kisayol` is only for a source checkout. `npm start` still works.
+Open **Compass** from the application menu. The packaged build already has a menu entry and a dock icon, so `npm run kisayol` is only for a source checkout. On Linux, `npm start` also adds or refreshes the menu entry and the compass icon on each launch, so the dock shows the icon while the app runs.
 
 In a browser: `npm run web` opens `http://127.0.0.1:4517`.
 

@@ -9,9 +9,9 @@ import { createSettingsStore } from '../src/settings.js';
 const HASH = 'c12fe1c06bba254a9dc9f519b335aa7c1367a88a';
 
 test('komut satırından gelen magnet bulunur', () => {
-  // Windows: "Torrent Bul.exe" --bayrak "magnet:?..."; Linux: AppImage yolu ve argümanlar.
-  assert.equal(magnetFromArgv(['C:\\Program Files\\Torrent Bul\\Torrent Bul.exe', '--allow-file-access', `magnet:?xt=urn:btih:${HASH}&dn=Film`]), `magnet:?xt=urn:btih:${HASH}&dn=Film`);
-  assert.equal(magnetFromArgv(['/opt/torrent-bul', `"magnet:?xt=urn:btih:${HASH}"`]), `magnet:?xt=urn:btih:${HASH}`);
+  // Windows: "Compass.exe" --bayrak "magnet:?..."; Linux: AppImage yolu ve argümanlar.
+  assert.equal(magnetFromArgv(['C:\\Program Files\\Compass\\Compass.exe', '--allow-file-access', `magnet:?xt=urn:btih:${HASH}&dn=Film`]), `magnet:?xt=urn:btih:${HASH}&dn=Film`);
+  assert.equal(magnetFromArgv(['/opt/compass', `"magnet:?xt=urn:btih:${HASH}"`]), `magnet:?xt=urn:btih:${HASH}`);
   assert.equal(magnetFromArgv(['electron', '.']), null);
   assert.equal(magnetFromArgv(['magnet:?dn=hash-yok']), null);
   assert.equal(magnetFromArgv(['https://ornek.com/magnet:?xt=urn:btih:' + HASH]), null);
@@ -19,7 +19,7 @@ test('komut satırından gelen magnet bulunur', () => {
 });
 
 test('tepsiye küçültme isteğe bağlı ve varsayılan kapalı', () => {
-  const file = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'torrent-bul-rel-')), 'settings.json');
+  const file = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'compass-rel-')), 'settings.json');
   fs.writeFileSync(file, JSON.stringify({ downloadDir: '/eski' }));
   const store = createSettingsStore(file);
   assert.equal(store.get().closeToTray, false);

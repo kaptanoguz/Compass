@@ -7,7 +7,7 @@ import createTorrent from 'create-torrent';
 import { launchQbittorrent } from '../../src/qbittorrent.js';
 
 export async function startSeeder(files, { name, uploadLimit = 0 } = {}) {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'torrent-bul-seeder-'));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'compass-seeder-'));
   const data = path.join(dir, 'data');
   fs.mkdirSync(path.join(data, name), { recursive: true });
   for (const [file, buf] of Object.entries(files)) fs.writeFileSync(path.join(data, name, file), buf);
