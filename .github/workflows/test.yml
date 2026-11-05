@@ -20,4 +20,6 @@ jobs:
           ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
       # İndirmeleri qBittorrent yapar; testler gerçek qbittorrent-nox ile çalışır.
       - run: sudo apt-get update && sudo apt-get install -y qbittorrent-nox
+      - run: QB_DEBUG=1 node --test --test-force-exit test/library.test.js
+        continue-on-error: true
       - run: npm test

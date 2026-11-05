@@ -379,6 +379,7 @@ export function createQbEngine({ profileDir, start = () => launchQbittorrent({ p
     for (const t of tracked) {
       if (t.destroyed) continue;
       const info = infos.get(t.infoHash);
+      if (process.env.QB_DEBUG && t.lastDebug !== `${info?.state}|${info?.progress}`) { t.lastDebug = `${info?.state}|${info?.progress}`; console.error('[qb-debug]', t.infoHash?.slice(0, 8), t.lastDebug, info?.save_path, info?.content_path, info?.dlspeed); }
       if (!info) { fail(t, new Error('Torrent qBittorrent listesinden kaldırıldı.')); continue; }
       if (info.state === 'error') { fail(t, new Error('qBittorrent bu torrentte hata bildirdi (klasöre yazılamıyor ya da disk dolu olabilir).')); continue; }
       if (info.state === 'missingFiles') { fail(t, new Error('İndirilen dosyalar bulunamadı; taşınmış ya da silinmiş olabilir.')); continue; }
@@ -472,6 +473,7 @@ export function createQbEngine({ profileDir, start = () => launchQbittorrent({ p
         // Dosyaları taşınmış/silinmiş eski kayıt ("Tekrar indir") ise qBittorrent'ten silinip temiz eklenir;
         // yoksa qBittorrent 5 onu "dosyalar bulunamadı" hatasıyla bırakır.
         let [existing] = await api.get('torrents/info', { hashes: t.infoHash });
+        if (process.env.QB_DEBUG) console.error('[qb-debug] existing', t.infoHash.slice(0, 8), existing && existing.state, existing && existing.progress, existing && existing.content_path);
         if (existing && existing.progress > 0 && existing.content_path && !fs.existsSync(existing.content_path)) {
           await api.post('torrents/delete', { hashes: t.infoHash, deleteFiles: 'false' });
           for (let i = 0; i < 40 && (await api.get('torrents/info', { hashes: t.infoHash })).length; i++) await sleep(50);
@@ -498,6 +500,7 @@ export function createQbEngine({ profileDir, start = () => launchQbittorrent({ p
           form.append('stopCondition', 'MetadataReceived');
         }
         const reply = await api.post('torrents/add', form);
+        if (process.env.QB_DEBUG) console.error('[qb-debug] add', t.infoHash.slice(0, 8), reply, existing ? 'existing' : 'fresh');
         if (!/ok/i.test(String(reply))) throw new Error('qBittorrent torrenti eklemedi.');
         t.added = true;
         if (t.destroyed) await release2(api, t);
