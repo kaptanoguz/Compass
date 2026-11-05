@@ -290,7 +290,6 @@ export function createQbEngine({ profileDir, start = () => launchQbittorrent({ p
   let session = null; // Promise<{ api, stop }>
   let limits = { download: 0, upload: 0 };
   const live = new Set();
-  const releasing = new Set(); // kapanışta beklenecek silme/duraklatma istekleri
   let timer = null;
   let failures = 0;
   let closing = false;
@@ -345,10 +344,7 @@ export function createQbEngine({ profileDir, start = () => launchQbittorrent({ p
     t.forget = forget;
     live.delete(t);
     if (!t.infoHash || !t.added || !session) return; // ekleme sürüyorsa add() kendisi halleder
-    const done = session.then((s) => (forget ? s.api.post('torrents/delete', { hashes: t.infoHash, deleteFiles: 'false' }) : control(s.api, 'pause', t.infoHash))).catch(() => {});
-    // Kapanış bu isteği bekler; yoksa qBittorrent silmeyi kaydetmeden kapanabilir.
-    releasing.add(done);
-    done.finally(() => releasing.delete(done));
+    session.then((s) => (forget ? s.api.post('torrents/delete', { hashes: t.infoHash, deleteFiles: 'false' }) : control(s.api, 'pause', t.infoHash))).catch(() => {});
   }
 
   function schedule() {
@@ -379,7 +375,6 @@ export function createQbEngine({ profileDir, start = () => launchQbittorrent({ p
     for (const t of tracked) {
       if (t.destroyed) continue;
       const info = infos.get(t.infoHash);
-      if (process.env.QB_DEBUG && t.lastDebug !== `${info?.state}|${info?.progress}`) { t.lastDebug = `${info?.state}|${info?.progress}`; console.error('[qb-debug]', t.infoHash?.slice(0, 8), t.lastDebug, info?.save_path, info?.content_path, info?.dlspeed); if (info) api.get('torrents/webseeds', { hash: t.infoHash }).then((w) => console.error('[qb-debug] webseeds', JSON.stringify(w))).catch((e) => console.error('[qb-debug] webseeds err', e.message)); }
       if (!info) { fail(t, new Error('Torrent qBittorrent listesinden kaldırıldı.')); continue; }
       if (info.state === 'error') { fail(t, new Error('qBittorrent bu torrentte hata bildirdi (klasöre yazılamıyor ya da disk dolu olabilir).')); continue; }
       if (info.state === 'missingFiles') { fail(t, new Error('İndirilen dosyalar bulunamadı; taşınmış ya da silinmiş olabilir.')); continue; }
@@ -426,7 +421,11 @@ export function createQbEngine({ profileDir, start = () => launchQbittorrent({ p
     t.pieces = new Array(Math.ceil(info.total_size / props.piece_size));
     t.length = info.total_size;
     t.name = info.name;
-    try { t.torrentFile = await api.get('torrents/export', { hash: t.infoHash }, { raw: true }); } catch { /* eski qBittorrent */ }
+    // Elde .torrent varsa o saklanır: qBittorrent 5'in dışa aktardığı dosyada web seed (url-list) yok,
+    // onunla yeniden eklenen Internet Archive torrenti hiç inmez. Dışa aktarma yalnızca magnet içindir.
+    if (!t.torrentFile) {
+      try { t.torrentFile = await api.get('torrents/export', { hash: t.infoHash }, { raw: true }); } catch { /* eski qBittorrent */ }
+    }
     // Bekletilen torrent eski seçimini taşıyabilir; varsayılan her eklemede açıkça kurulur.
     const want = t.deselect ? 0 : 1;
     await setPriority(api, t, t.files.filter((f) => f.priority !== want).map((f) => f.index), want);
@@ -470,16 +469,7 @@ export function createQbEngine({ profileDir, start = () => launchQbittorrent({ p
         if (buf) t.torrentFile = buf;
         if (t.destroyed) return;
         // Duraklatılıp bekletilen torrent yeniden eklenmez: dosyalar baştan kontrol edilmeden sürer.
-        // Dosyaları taşınmış/silinmiş eski kayıt ("Tekrar indir") ise qBittorrent'ten silinip temiz eklenir;
-        // yoksa qBittorrent 5 onu "dosyalar bulunamadı" hatasıyla bırakır.
-        let [existing] = await api.get('torrents/info', { hashes: t.infoHash });
-        if (process.env.QB_DEBUG) console.error('[qb-debug] existing', t.infoHash.slice(0, 8), existing && existing.state, existing && existing.progress, existing && existing.content_path);
-        if (existing && existing.progress > 0 && existing.content_path && !fs.existsSync(existing.content_path)) {
-          await api.post('torrents/delete', { hashes: t.infoHash, deleteFiles: 'false' });
-          for (let i = 0; i < 40 && (await api.get('torrents/info', { hashes: t.infoHash })).length; i++) await sleep(50);
-          existing = null;
-        }
-        if (existing) {
+        if ((await api.get('torrents/info', { hashes: t.infoHash })).length) {
           await control(api, 'pause', t.infoHash); // seçim yeniden yapılana kadar inmesin
           t.added = true;
           if (t.destroyed) release2(api, t);
@@ -500,7 +490,6 @@ export function createQbEngine({ profileDir, start = () => launchQbittorrent({ p
           form.append('stopCondition', 'MetadataReceived');
         }
         const reply = await api.post('torrents/add', form);
-        if (process.env.QB_DEBUG) console.error('[qb-debug] add', t.infoHash.slice(0, 8), reply, existing ? 'existing' : 'fresh');
         if (!/ok/i.test(String(reply))) throw new Error('qBittorrent torrenti eklemedi.');
         t.added = true;
         if (t.destroyed) await release2(api, t);
@@ -556,7 +545,6 @@ export function createQbEngine({ profileDir, start = () => launchQbittorrent({ p
     async destroy() {
       closing = true;
       clearTimeout(timer);
-      await Promise.all(releasing);
       for (const t of live) t.destroyed = true;
       live.clear();
       if (!session) return;
