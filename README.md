@@ -29,7 +29,7 @@ Compass is a simple desktop app. You type what you're looking for, press **Ara**
 1. Install **qBittorrent**, the free program that does the actual downloading. Compass runs it in the background for you, so you never need to open it.
    - Windows: download it from [qbittorrent.org](https://www.qbittorrent.org/download).
    - Linux: open a terminal and run `sudo apt install qbittorrent-nox`.
-2. Download Compass from the [releases page](https://github.com/kaptanoguz/torrent/releases) and install it.
+2. Download Compass from the [releases page](https://github.com/kaptanoguz/Compass/releases) and install it.
 3. Open **Compass** from your application menu.
 
 Your downloads go to the `Downloads/Torrent` folder. You can change this in Settings (the gear icon).
