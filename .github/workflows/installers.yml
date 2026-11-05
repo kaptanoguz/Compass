@@ -59,10 +59,14 @@ jobs:
           if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
             tag="v$(node -p "require('./src/package.json').version")"
           fi
+          notes_file="src/.github/release-notes/$tag.md"
           if ! gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             notes=(--generate-notes)
-            [ -f "src/.github/release-notes/$tag.md" ] && notes=(--notes-file "src/.github/release-notes/$tag.md")
+            [ -f "$notes_file" ] && notes=(--notes-file "$notes_file")
             gh release create "$tag" --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "Compass $tag" "${notes[@]}"
+          elif [ -f "$notes_file" ]; then
+            # Notlar sonradan düzeltilirse yeniden çalıştırmak sürüm sayfasını da günceller.
+            gh release edit "$tag" --repo "$GITHUB_REPOSITORY" --notes-file "$notes_file"
           fi
           files=()
           while IFS= read -r -d '' f; do
