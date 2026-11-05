@@ -1,89 +1,63 @@
 # Compass
 
-Search for a movie, series, album, or book, download it, and play it while it finishes. Downloads run in [qBittorrent](https://www.qbittorrent.org). The app starts qBittorrent with its own profile and does not touch your settings or torrent list. The interface is Turkish.
+Find a movie, series, album, or book, download it with one click, and start watching while it finishes.
 
-This is a developer build. There is no installer yet. You need Node.js 20, qBittorrent, and `npm start`.
+![Compass home screen](docs/home.png)
 
-## What it does
+Compass is a simple desktop app. You type what you're looking for, press **Ara** (Search), and press **İndir** (Download). That's it. The app's menus are in Turkish.
 
-- Type a title, pick a category, download.
-- Movies and series get a rating and poster from Cinemeta, with no API key. An optional free OMDb key in Settings also shows the vote count.
-- In a multi-file torrent you choose which files to download. An executable shipped as a movie (`.exe` and similar) is not downloaded. Programs only download from the Software category.
-- A few downloads run at once; the rest wait. Unfinished downloads resume after you close and reopen the app.
-- Finished videos stay on the home page under Son izlenen. You can resume and mark one as watched.
-- Add Jackett or Prowlarr if you want other sites. The app does not ship with any torrent site of its own.
+> Only download what you have the right to download. Out of the box, Compass searches the Internet Archive, which has public domain and freely licensed works.
 
-Only download what you have the right to download.
+## What you can do
 
-## Sources
+**Search by name, topic, or genre.** Results show the year, genre, size, and a rating. Turkish results come first, and you can turn that off.
 
-| Source | Default | Note |
-| --- | --- | --- |
-| Internet Archive | On | Public domain and freely licensed works. Current commercial films are not here. |
-| Torznab (Jackett / Prowlarr) | Off | Address and API key in Settings. Seeder counts are shown. |
+![Search results](docs/results.png)
 
-Jackett on Linux:
+**Download with one click.** Downloads show progress, speed, and time left. If you close the app, unfinished downloads continue next time you open it.
 
-```bash
-cd ~ && wget https://github.com/Jackett/Jackett/releases/latest/download/Jackett.Binaries.LinuxAMDx64.tar.gz
-tar -xzf Jackett.Binaries.LinuxAMDx64.tar.gz && cd Jackett && sudo ./install_service_systemd.sh
-```
+![Downloads panel](docs/downloads.png)
 
-1. Open `http://127.0.0.1:9117` and add sites with **+ Add indexer**.
-2. Copy the API key at the top right.
-3. In Compass open **Ayarlar**, choose **+ Kendi indeksleyicini ekle**, paste the key, and save.
+**Watch right away.** The built-in player can start before the download is done. It remembers where you stopped, and you can load your own subtitles.
 
-Private trackers you belong to are in Jackett's list too. Some Cloudflare-protected sites also need [FlareSolverr](https://github.com/FlareSolverr/FlareSolverr).
+![Built-in player](docs/player.png)
 
-To add a source in code, put a module with a `search(params)` function under `src/providers/` and register it in `src/search.js`.
-
-The genre list and the +18 category stay hidden until a Torznab source is enabled. Internet Archive alone does not make those useful.
+**Stay safe.** If a "movie" turns out to be a program (like an `.exe` file), Compass won't download it.
 
 ## Install
 
-Installers for Linux and Windows are on the [releases page](https://github.com/kaptanoguz/torrent/releases). qBittorrent is not inside the installer. Linux: `sudo apt install qbittorrent-nox`. Windows: install qBittorrent from [qbittorrent.org](https://www.qbittorrent.org/download), then run the setup exe. The app looks for `qbittorrent.exe` in `Program Files`.
+1. Install **qBittorrent**, the free program that does the actual downloading. Compass runs it in the background for you, so you never need to open it.
+   - Windows: download it from [qbittorrent.org](https://www.qbittorrent.org/download).
+   - Linux: open a terminal and run `sudo apt install qbittorrent-nox`.
+2. Download Compass from the [releases page](https://github.com/kaptanoguz/Compass/releases) and install it.
+3. Open **Compass** from your application menu.
 
-From source:
+Your downloads go to the `Downloads/Torrent` folder. You can change this in Settings (the gear icon).
+
+## Want more search results?
+
+By default Compass only searches the Internet Archive, so you won't find new movies there. If you'd like to search other sites, you can connect **Jackett**, a free tool that lets Compass search them for you:
+
+1. Install [Jackett](https://github.com/Jackett/Jackett) and open `http://127.0.0.1:9117`.
+2. Click **+ Add indexer** and pick the sites you want.
+3. Copy the **API Key** shown at the top right.
+4. In Compass, open Settings (gear icon), click **+ Kendi indeksleyicini ekle** (Add your own indexer), paste the key, and save.
+
+Once Jackett is connected, Compass also shows genre shortcuts on the home screen.
+
+## For developers
+
+Compass is an Electron app with a small local server. It needs Node.js 20 or newer and qBittorrent.
 
 ```bash
-sudo apt install qbittorrent-nox   # Linux, no window
 npm install
-npm run kisayol                    # Linux only, if you did not use the installer
+npm start        # desktop app
+npm run web      # same app in your browser at http://127.0.0.1:4517
+npm test         # needs qbittorrent-nox
+npm run dist:linux   # or dist:win, builds an installer into dist/
 ```
 
-Open **Compass** from the application menu. The packaged build already has a menu entry and a dock icon, so `npm run kisayol` is only for a source checkout. On Linux, `npm start` also adds or refreshes the menu entry and the compass icon on each launch, so the dock shows the icon while the app runs.
-
-In a browser: `npm run web` opens `http://127.0.0.1:4517`.
-
-Build installers locally (output in `dist/`, not signed):
-
-```bash
-npm run dist:win
-npm run dist:linux
-```
-
-Downloads go to `Downloads/Torrent` by default. Change the folder in Settings.
-
-## Development
-
-```bash
-npm test
-```
-
-Tests cover Turkish detection, Archive and Torznab queries, state files, file selection, the library, the queue, and one real download through qBittorrent. `qbittorrent-nox` is required. GitHub Actions runs them on every push and pull request.
-
-```
-electron/main.js        Desktop window
-bin/web.js              Browser mode
-src/server.js           Local API (127.0.0.1 only, session key)
-src/downloads.js        Download manager
-src/qbittorrent.js      Starts qBittorrent and drives the Web API
-src/library.js          Watch history
-src/search.js           Combines sources
-src/ranking.js          Turkish detection and ranking
-src/providers/          Internet Archive and Torznab
-public/                 Interface
-```
+New search sources go in `src/providers/` and are registered in `src/search.js`.
 
 ## License
 
