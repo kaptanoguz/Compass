@@ -28,11 +28,11 @@ Compass is a simple desktop app. You type what you're looking for, press **Ara**
 
 1. Install **qBittorrent**, the free program that does the actual downloading. Compass runs it in the background for you, so you never need to open it.
    - Windows: download it from [qbittorrent.org](https://www.qbittorrent.org/download).
-   - Linux: open a terminal and run `sudo apt install qbittorrent-nox`.
+   - Linux: the `.deb` installs it for you. With the `.AppImage`, run `sudo apt install qbittorrent-nox` first.
 2. Download Compass from the [releases page](https://github.com/kaptanoguz/Compass/releases) and install it.
 3. Open **Compass** from your application menu.
 
-Your downloads go to the `Downloads/Torrent` folder. You can change this in Settings (the gear icon).
+Your downloads go to a `Torrent` folder inside your Downloads folder. You can change this in Settings (the gear icon).
 
 ## Want more search results?
 
@@ -47,17 +47,19 @@ Once Jackett is connected, Compass also shows genre shortcuts on the home screen
 
 ## For developers
 
-Compass is an Electron app with a small local server. It needs Node.js 20 or newer and qBittorrent.
+Compass is written in Rust with [Tauri](https://tauri.app). The window shows the pages in `public/`, served by a small local server in `src-tauri/src/server.rs`. qBittorrent does the downloading.
+
+You need Rust, Node.js 20 or newer, qBittorrent, and on Linux the WebKitGTK build libraries:
 
 ```bash
+sudo apt install libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev qbittorrent-nox
 npm install
 npm start        # desktop app
-npm run web      # same app in your browser at http://127.0.0.1:4517
-npm test         # needs qbittorrent-nox
-npm run dist:linux   # or dist:win, builds an installer into dist/
+npm test         # Rust tests; the download tests use qbittorrent-nox
+npm run build    # installers into src-tauri/target/release/bundle/
 ```
 
-New search sources go in `src/providers/` and are registered in `src/search.js`.
+New search sources go in `src-tauri/src/providers/` and are registered in `src-tauri/src/search.rs`.
 
 ## License
 

@@ -1,0 +1,65 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Compass",
+  "version": "2.0.0",
+  "identifier": "com.kaptanoguz.compass",
+  "build": {
+    "frontendDist": "../public"
+  },
+  "app": {
+    "windows": [],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": [
+      "deb",
+      "appimage",
+      "nsis"
+    ],
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "category": "Utility",
+    "shortDescription": "Search, download, and play. qBittorrent does the transfer.",
+    "longDescription": "Compass searches films, series, music and books, downloads them with qBittorrent and plays them in a built-in player. Internet Archive (public domain) is the default source.",
+    "publisher": "kaptanoguz",
+    "license": "MIT",
+    "linux": {
+      "deb": {
+        "depends": [
+          "qbittorrent-nox | qbittorrent"
+        ],
+        "recommends": [
+          "gstreamer1.0-plugins-good",
+          "gstreamer1.0-libav"
+        ],
+        "desktopTemplate": "compass.desktop"
+      },
+      "appimage": {
+        "bundleMediaFramework": true
+      }
+    },
+    "windows": {
+      "nsis": {
+        "installMode": "currentUser"
+      }
+    }
+  },
+  "plugins": {
+    "deep-link": {
+      "desktop": {
+        "schemes": [
+          "magnet"
+        ]
+      }
+    }
+  }
+}

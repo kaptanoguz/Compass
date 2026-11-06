@@ -1,0 +1,14 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name={{name}}
+GenericName=Torrent arama
+Comment=Film, dizi ve kitap ara, indir, izle
+Exec={{exec}} %U
+Icon={{icon}}
+Terminal=false
+Categories=AudioVideo;Network;FileTransfer;
+Keywords=torrent;film;dizi;video;pusula;
+StartupNotify=true
+StartupWMClass=compass
+MimeType=x-scheme-handler/magnet;
