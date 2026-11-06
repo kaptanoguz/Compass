@@ -235,7 +235,15 @@ async fn only_chosen_files_download_and_the_choice_survives_a_restart() {
     assert!(!on_disk(&dl.join("Paket/sample.mp4"), &sample), "file that was not chosen did not download");
 
     // The finished film is in the library and plays from the media address with Range.
-    let (_, lib) = c.call("GET", "library", None).await;
+    // The list can say "done" (qBittorrent's state) a moment before the library entry is written.
+    let mut lib = Value::Null;
+    for _ in 0..50 {
+        lib = c.call("GET", "library", None).await.1;
+        if lib.as_array().is_some_and(|a| !a.is_empty()) {
+            break;
+        }
+        tokio::time::sleep(Duration::from_millis(100)).await;
+    }
     assert_eq!(lib[0]["items"][0]["name"], "film.mp4");
     let media = format!("{}media/{id}/0?t={}", c.app.url, c.app.token);
     let res = c.http.get(&media).header("range", "bytes=10-19").send().await.unwrap();
