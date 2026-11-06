@@ -9,15 +9,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      # Libraries for the desktop window, and qBittorrent: the tests download for real.
+      - run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev qbittorrent-nox
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
         with:
-          node-version: 20
-          cache: npm
-      # Electron ikilisi indirilmez ve yerel modüller Electron'a göre yeniden
-      # derlenmez (postinstall); testler düz Node ile çalışır.
-      - run: npm ci --ignore-scripts
-        env:
-          ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
-      # İndirmeleri qBittorrent yapar; testler gerçek qbittorrent-nox ile çalışır.
-      - run: sudo apt-get update && sudo apt-get install -y qbittorrent-nox
-      - run: npm test
+          workspaces: src-tauri
+      - run: cargo test --manifest-path src-tauri/Cargo.toml
+
+  # The Windows installer is built only for releases; this catches Windows-only build errors early.
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+      - run: cargo check --manifest-path src-tauri/Cargo.toml
