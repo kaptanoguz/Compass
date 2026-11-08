@@ -5,6 +5,7 @@ use crate::categories::{detect_genres, is_adult};
 use crate::model::SearchResult;
 use crate::net::{Net, SourceError};
 use crate::providers::{archive, torznab};
+use crate::providers::torznab::Found;
 use crate::ranking::rank_results;
 use crate::ratings::{add_imdb_ratings, RatingsCache};
 use crate::settings::{Settings, Torznab};
@@ -48,12 +49,13 @@ impl Provider {
             Provider::Fixed(n, _) => n.clone(),
         }
     }
-    async fn search(&self, p: &SearchParams, net: &Net, timeout: Option<Duration>) -> Result<Vec<SearchResult>, SourceError> {
+    async fn search(&self, p: &SearchParams, net: &Net, timeout: Option<Duration>) -> Result<Found, SourceError> {
+        let only = |results| Found { results, failures: vec![] };
         match self {
-            Provider::Archive => archive::search(p, net, timeout.unwrap_or(archive::TIMEOUT)).await,
+            Provider::Archive => archive::search(p, net, timeout.unwrap_or(archive::TIMEOUT)).await.map(only),
             Provider::Torznab(t) => torznab::search(t, p, net, timeout.unwrap_or(torznab::TIMEOUT)).await,
             #[cfg(test)]
-            Provider::Fixed(_, r) => r.clone().map_err(SourceError::msg),
+            Provider::Fixed(_, r) => r.clone().map(only).map_err(SourceError::msg),
         }
     }
 }
@@ -77,6 +79,12 @@ pub struct SourceFailure {
     pub message: String,
 }
 
+impl SourceFailure {
+    fn new(provider: String, e: SourceError) -> Self {
+        SourceFailure { provider, message: if e.timeout { "Yanıt vermedi (zaman aşımı).".into() } else { e.message } }
+    }
+}
+
 #[derive(Serialize)]
 pub struct SearchOutput {
     pub results: Vec<SearchResult>,
@@ -97,11 +105,11 @@ pub async fn search_all(p: &SearchParams, providers: &[Provider], deps: SearchDe
     let mut errors = vec![];
     for (i, s) in settled.into_iter().enumerate() {
         match s {
-            Ok(v) => results.extend(v),
-            Err(e) => errors.push(SourceFailure {
-                provider: providers[i].name(),
-                message: if e.timeout { "Yanıt vermedi (zaman aşımı).".into() } else { e.message },
-            }),
+            Ok(found) => {
+                results.extend(found.results);
+                errors.extend(found.failures.into_iter().map(|(provider, e)| SourceFailure::new(provider, e)));
+            }
+            Err(e) => errors.push(SourceFailure::new(providers[i].name(), e)),
         }
     }
 
