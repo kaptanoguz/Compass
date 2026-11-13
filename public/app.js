@@ -1164,9 +1164,18 @@ $('settings').addEventListener('close', async () => {
   }
 });
 
-window.addEventListener('scroll', () => {
-  document.querySelector('.topbar').classList.toggle('scrolled', window.scrollY > 4);
-}, { passive: true });
+/* Arama çubuğu üstte sabit: üst çubuğun yüksekliğini CSS'e ver, yapışınca alt çizgi göster. */
+const topbarEl = document.querySelector('.topbar');
+const heroEl = document.querySelector('.hero');
+function syncStickyHeader() {
+  const h = topbarEl.offsetHeight;
+  document.documentElement.style.setProperty('--topbar-h', `${h}px`);
+  topbarEl.classList.toggle('scrolled', window.scrollY > 4);
+  heroEl.classList.toggle('stuck', window.scrollY > 4 && heroEl.getBoundingClientRect().top <= h + 0.5);
+}
+window.addEventListener('scroll', syncStickyHeader, { passive: true });
+window.addEventListener('resize', syncStickyHeader);
+syncStickyHeader();
 
 /* ---------- Başlat ---------- */
 
